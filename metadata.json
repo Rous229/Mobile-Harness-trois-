@@ -1,0 +1,6 @@
+{
+  "name": "Mobile Harness",
+  "description": "The complete autonomous AI development workspace for managing coding agents, project sessions, Linux terminal execution, and provider configurations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
