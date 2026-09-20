@@ -32,15 +32,67 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Accept Android SDK Licenses & Install NDK / CMake
+      - name: Set up Android SDK & accept licenses
         run: |
-          echo "Accepting Android SDK licenses..."
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          echo "Installing required NDK (26.1.10909125) and CMake (3.22.1)..."
-          sdkmanager "ndk;26.1.10909125" "cmake;3.22.1"
+          export ANDROID_HOME="/usr/local/lib/android/sdk"
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          # Locate any available sdkmanager (prefer the newest cmdline-tools)
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 3 -name sdkmanager -type f 2>/dev/null | sort -V | tail -n 1 || true)"
+          if [ -z "$SDKMANAGER" ]; then
+            echo "ERROR: no sdkmanager found under $ANDROID_HOME/cmdline-tools"
+            ls -R "$ANDROID_HOME/cmdline-tools" 2>/dev/null || true
+            exit 1
+          fi
+          echo "Using sdkmanager at: $SDKMANAGER"
+          echo "Using ANDROID_HOME=$ANDROID_HOME"
+
+          # Accept all Android SDK licenses non-interactively
+          yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
+
+          # Belt-and-suspenders: write accepted license hashes directly so
+          # AGP can auto-install any missing platform / build-tools.
+          mkdir -p "$ANDROID_HOME/licenses"
+          printf '%s\n' \
+            "8933bad161af4178b1185d1a37fbf41ea5269c55" \
+            "d56f5187479451eabf01fb78af6dfcb131a6481e" \
+            "24333f8a63b6825ea9c5514f83c2829b004d1fee" \
+            > "$ANDROID_HOME/licenses/android-sdk-license"
+          printf '%s\n' "84831b9409646a918e30573bab4c9c91346d8abd" \
+            > "$ANDROID_HOME/licenses/android-sdk-preview-license"
+          printf '%s\n' "601085b94cd77f0b54ff86406957099ebe79c4d6" \
+            > "$ANDROID_HOME/licenses/android-googletv-license"
+
+      - name: Install required Android SDK packages (platform, build-tools, NDK, CMake)
+        run: |
+          export ANDROID_HOME="/usr/local/lib/android/sdk"
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          # Locate any available sdkmanager (prefer the newest cmdline-tools)
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -maxdepth 3 -name sdkmanager -type f 2>/dev/null | sort -V | tail -n 1 || true)"
+          if [ -z "$SDKMANAGER" ]; then
+            echo "ERROR: no sdkmanager found under $ANDROID_HOME/cmdline-tools"
+            exit 1
+          fi
+          echo "Using sdkmanager at: $SDKMANAGER"
+          echo "Installing platforms;android-36, build-tools, NDK 26.1.10909125 and CMake 3.22.1..."
+          yes | "$SDKMANAGER" --install \
+            "platforms;android-36" \
+            "build-tools;34.0.0" \
+            "build-tools;36.0.0" \
+            "ndk;26.1.10909125" \
+            "cmake;3.22.1" \
+            || echo "SDK package install reported a non-zero exit; continuing."
+
+          echo "=== Installed repositories ==="
+          ls "$ANDROID_HOME/platforms" || true
+          ls "$ANDROID_HOME/build-tools" || true
+          ls "$ANDROID_HOME/ndk" || true
+          ls "$ANDROID_HOME/cmake" || true
+
+          # Verify the critical components are present
+          [ -d "$ANDROID_HOME/platforms/android-36" ] || { echo "ERROR: platform android-36 not installed"; exit 1; }
+          [ -d "$ANDROID_HOME/ndk/26.1.10909125" ] || { echo "ERROR: NDK 26.1.10909125 not installed"; exit 1; }
+          [ -d "$ANDROID_HOME/cmake/3.22.1" ] || { echo "ERROR: CMake 3.22.1 not installed"; exit 1; }
+          echo "All critical SDK components are in place."
 
       - name: Ensure Native Submodules and Talloc Sources
         run: |
