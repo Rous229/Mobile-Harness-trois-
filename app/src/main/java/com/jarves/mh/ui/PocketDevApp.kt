@@ -2343,7 +2343,7 @@ private fun ProviderSetupScreen(
                     apiKey = apiKey,
                     onBaseUrl = {
                         baseUrl = it
-                        if (agentKind == AgentKind.DEEPSEEK_HARNESS && selected == ProviderKind.CUSTOM) {
+                        if (agentKind == AgentKind.DEEPSEEK_HARNESS && (selected == ProviderKind.CUSTOM || selected == ProviderKind.CUSTOM_OPENAI)) {
                             dshApi = inferredDshApiForUrl(it)
                         }
                     },
@@ -2578,6 +2578,7 @@ private fun ProviderChoiceRow(
         ProviderKind.OPENCODE_ZEN -> Color(0xFF22C55E)
         ProviderKind.NVIDIA_NIM -> Color(0xFF76B900)
         ProviderKind.CUSTOM -> PocketOrange
+        ProviderKind.CUSTOM_OPENAI -> Color(0xFF10A37F)
     }
     val mark = when (provider) {
         ProviderKind.CLAUDE -> "C"
@@ -2588,6 +2589,7 @@ private fun ProviderChoiceRow(
         ProviderKind.OPENCODE_ZEN -> "Z"
         ProviderKind.NVIDIA_NIM -> "NV"
         ProviderKind.CUSTOM -> "<>"
+        ProviderKind.CUSTOM_OPENAI -> "OA"
     }
 
     Row(

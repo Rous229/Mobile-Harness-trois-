@@ -987,7 +987,7 @@ fun AgentScreen(
                         },
                         onBaseUrl = {
                             baseUrl = it
-                            if (state.agentKind == AgentKind.DEEPSEEK_HARNESS && selectedKind == ProviderKind.CUSTOM) {
+                            if (state.agentKind == AgentKind.DEEPSEEK_HARNESS && (selectedKind == ProviderKind.CUSTOM || selectedKind == ProviderKind.CUSTOM_OPENAI)) {
                                 dshApi = inferredDshApiForUrl(it)
                             }
                             models = emptyList()
@@ -1515,7 +1515,7 @@ private fun AgentProviderCard(
                                         .clickable {
                                             onProvider(kind)
                                             connectionExpanded = false
-                                            endpointExpanded = kind == ProviderKind.CUSTOM
+                                            endpointExpanded = kind == ProviderKind.CUSTOM || kind == ProviderKind.CUSTOM_OPENAI
                                         }
                                         .padding(horizontal = 13.dp, vertical = 11.dp),
                                     verticalAlignment = Alignment.CenterVertically,
@@ -1541,7 +1541,7 @@ private fun AgentProviderCard(
 
                 PremiumSummaryRow(
                     icon = Icons.Default.Info,
-                    title = if (selectedKind == ProviderKind.CUSTOM) "Custom API settings" else "Endpoint & protocol",
+                    title = if (selectedKind == ProviderKind.CUSTOM || selectedKind == ProviderKind.CUSTOM_OPENAI) "Custom API settings" else "Endpoint & protocol",
                     subtitle = buildString {
                         append(baseUrl.ifBlank { "Base URL required" })
                         if (state.agentKind == AgentKind.DEEPSEEK_HARNESS && selectedKind in DSH_PROTOCOL_PROVIDERS) {
@@ -1558,9 +1558,12 @@ private fun AgentProviderCard(
                         modifier = Modifier.padding(top = 8.dp, bottom = 10.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        if (selectedKind == ProviderKind.CUSTOM) {
+                        if (selectedKind == ProviderKind.CUSTOM || selectedKind == ProviderKind.CUSTOM_OPENAI) {
                             Text(
-                                "Enter the provider endpoint, then add its API key under Credentials.",
+                                if (selectedKind == ProviderKind.CUSTOM_OPENAI)
+                                    "Enter the OpenAI-compatible endpoint (e.g. https://api.openai.com/v1), then add your API key under Credentials."
+                                else
+                                    "Enter the provider endpoint, then add its API key under Credentials.",
                                 fontSize = 11.sp,
                                 lineHeight = 15.sp,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1998,6 +2001,12 @@ private fun defaultModelsForProvider(kind: ProviderKind): List<DiscoveredModel> 
         DiscoveredModel("kimi-k2.6", "Kimi K2.6"),
         DiscoveredModel("moonshot-v1-8k", "Moonshot v1 8K"),
         DiscoveredModel("moonshot-v1-32k", "Moonshot v1 32K"),
+    )
+    ProviderKind.CUSTOM_OPENAI -> listOf(
+        DiscoveredModel("gpt-4o", "GPT-4o"),
+        DiscoveredModel("gpt-4o-mini", "GPT-4o Mini"),
+        DiscoveredModel("o3-mini", "o3-mini"),
+        DiscoveredModel("chatgpt-4o-latest", "ChatGPT 4o Latest"),
     )
     else -> if (kind.defaultModel.isNotBlank()) listOf(
         DiscoveredModel(kind.defaultModel, "${kind.title} Default (${kind.defaultModel})")

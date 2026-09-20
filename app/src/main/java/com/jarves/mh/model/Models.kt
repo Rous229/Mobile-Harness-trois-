@@ -42,6 +42,7 @@ enum class ProviderKind(
         fixedProtocol = true,
     ),
     CUSTOM("Custom API", "Anthropic-compatible endpoint", ProviderProtocol.ANTHROPIC_GATEWAY, "", "", true),
+    CUSTOM_OPENAI("Custom OpenAI", "OpenAI-compatible endpoint", ProviderProtocol.OPENAI_CHAT, "https://api.openai.com/v1", "gpt-4o", true),
 }
 
 /**
@@ -90,6 +91,7 @@ val DEEPSEEK_HARNESS_PROVIDERS: Set<ProviderKind> = setOf(
     ProviderKind.OPENCODE_ZEN,
     ProviderKind.NVIDIA_NIM,
     ProviderKind.CUSTOM,
+    ProviderKind.CUSTOM_OPENAI,
 )
 
 val DSH_PROTOCOL_PROVIDERS: Set<ProviderKind> = setOf(
@@ -97,11 +99,13 @@ val DSH_PROTOCOL_PROVIDERS: Set<ProviderKind> = setOf(
     ProviderKind.OPENCODE_ZEN,
     ProviderKind.NVIDIA_NIM,
     ProviderKind.CUSTOM,
+    ProviderKind.CUSTOM_OPENAI,
 )
 
 fun defaultDshApiForProvider(kind: ProviderKind): String = when (kind) {
     ProviderKind.OPENCODE_ZEN -> "openai-responses"
     ProviderKind.NVIDIA_NIM -> "openai-completions"
+    ProviderKind.CUSTOM_OPENAI -> "openai-completions"
     else -> "anthropic-messages"
 }
 

@@ -531,7 +531,7 @@ export const StartupScreens: React.FC<StartupScreensProps> = ({
                 Select Model Provider
               </label>
               <div className="grid grid-cols-2 gap-2">
-                {(['ANTHROPIC', 'LLM_ROUTER', 'DEEPSEEK', 'KIMI'] as ProviderKind[]).map((kind) => {
+                {(['ANTHROPIC', 'LLM_ROUTER', 'DEEPSEEK', 'KIMI', 'CUSTOM_OPENAI', 'CUSTOM'] as ProviderKind[]).map((kind) => {
                   const meta = PROVIDER_DEFINITIONS[kind];
                   const isSelected = provider.kind === kind;
 

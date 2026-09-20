@@ -14,7 +14,8 @@ export type ProviderKind =
   | 'KIMI'
   | 'OPENCODE_ZEN'
   | 'NVIDIA_NIM'
-  | 'CUSTOM';
+  | 'CUSTOM'
+  | 'CUSTOM_OPENAI';
 
 export interface ProviderMeta {
   kind: ProviderKind;

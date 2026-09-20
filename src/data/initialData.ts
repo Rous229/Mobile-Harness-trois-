@@ -111,6 +111,15 @@ export const PROVIDER_DEFINITIONS: Record<ProviderKind, ProviderMeta> = {
     defaultModel: 'custom-model',
     experimental: true,
   },
+  CUSTOM_OPENAI: {
+    kind: 'CUSTOM_OPENAI',
+    title: 'Custom OpenAI',
+    subtitle: 'OpenAI-compatible endpoint',
+    protocol: 'OPENAI_CHAT',
+    defaultBaseUrl: 'https://api.openai.com/v1',
+    defaultModel: 'gpt-4o',
+    experimental: true,
+  },
 };
 
 export const DEV_STACKS_INFO: Record<DevStack, DevStackInfo> = {

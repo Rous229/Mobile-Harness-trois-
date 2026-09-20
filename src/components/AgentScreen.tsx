@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Bot,
   Key,
@@ -46,6 +46,10 @@ export const AgentScreen: React.FC<AgentScreenProps> = ({
   const [keyInput, setKeyInput] = useState(apiKey);
   const [testingConnection, setTestingConnection] = useState(false);
   const [testResult, setTestResult] = useState<ConnectionValidation | null>(null);
+
+  useEffect(() => {
+    setKeyInput(apiKey);
+  }, [apiKey]);
 
   const activeAgentMeta = AGENT_DEFINITIONS[activeAgent];
   const activeProviderMeta = PROVIDER_DEFINITIONS[provider.kind];
@@ -297,6 +301,30 @@ export const AgentScreen: React.FC<AgentScreenProps> = ({
               onChange={(e) => onUpdateProvider({ ...provider, baseUrl: e.target.value })}
               className="w-full bg-[#0B0E14] border border-[#2A3240] disabled:opacity-60 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F28C52] font-mono"
             />
+            {provider.kind === 'CUSTOM_OPENAI' && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {[
+                  { label: 'OpenAI', url: 'https://api.openai.com/v1' },
+                  { label: 'Groq', url: 'https://api.groq.com/openai/v1' },
+                  { label: 'Together', url: 'https://api.together.xyz/v1' },
+                  { label: 'Local (11434)', url: 'http://localhost:11434/v1' },
+                  { label: 'Local (1234)', url: 'http://localhost:1234/v1' },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => onUpdateProvider({ ...provider, baseUrl: item.url })}
+                    className={`text-[10px] px-2 py-0.5 rounded-md border font-mono transition-colors ${
+                      provider.baseUrl === item.url
+                        ? 'bg-[#10A37F]/20 text-[#10A37F] border-[#10A37F]/40'
+                        : 'bg-[#131821] text-neutral-400 border-[#2A3240] hover:text-white'
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Model Identifier Input */}
@@ -310,6 +338,24 @@ export const AgentScreen: React.FC<AgentScreenProps> = ({
               onChange={(e) => onUpdateProvider({ ...provider, model: e.target.value })}
               className="w-full bg-[#0B0E14] border border-[#2A3240] rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-[#F28C52] font-mono"
             />
+            {provider.kind === 'CUSTOM_OPENAI' && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {['gpt-4o', 'gpt-4o-mini', 'o3-mini', 'deepseek-chat', 'qwen/qwen-2.5-coder-32b'].map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => onUpdateProvider({ ...provider, model: m })}
+                    className={`text-[10px] px-2 py-0.5 rounded-md border font-mono transition-colors ${
+                      provider.model === m
+                        ? 'bg-[#10A37F]/20 text-[#10A37F] border-[#10A37F]/40'
+                        : 'bg-[#131821] text-neutral-400 border-[#2A3240] hover:text-white'
+                    }`}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Keystore API Key Input */}

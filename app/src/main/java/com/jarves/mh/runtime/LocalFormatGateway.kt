@@ -60,6 +60,14 @@ internal class LocalFormatGateway(
             writeJson(output, 200, JSONObject().put("input_tokens", approximate).toString())
             return
         }
+        if (path.endsWith("/models")) {
+            val currentModel = profile.model.ifBlank { "gpt-4o" }
+            val modelsList = JSONArray()
+                .put(JSONObject().put("id", currentModel).put("name", currentModel))
+                .put(JSONObject().put("id", "claude-sonnet-4-6").put("name", "claude-sonnet-4-6"))
+            writeJson(output, 200, JSONObject().put("data", modelsList).toString())
+            return
+        }
         if (!path.endsWith("/messages")) {
             writeJson(output, 404, errorJson("not_found", "Unsupported gateway endpoint"))
             return
@@ -165,7 +173,13 @@ internal class LocalFormatGateway(
     }
 
     private fun callProvider(body: JSONObject): Pair<Int, String> {
-        val endpoint = profile.baseUrl.trimEnd('/') + "/chat/completions"
+        val rawBase = profile.baseUrl.trim().ifBlank { profile.kind.defaultBaseUrl.ifBlank { "https://api.openai.com/v1" } }.trimEnd('/')
+        val endpoint = when {
+            rawBase.endsWith("/chat/completions") -> rawBase
+            rawBase.endsWith("/v1") -> "$rawBase/chat/completions"
+            rawBase.equals("https://api.openai.com", ignoreCase = true) -> "https://api.openai.com/v1/chat/completions"
+            else -> "$rawBase/chat/completions"
+        }
         val connection = URL(endpoint).openConnection() as HttpURLConnection
         return try {
             connection.requestMethod = "POST"
